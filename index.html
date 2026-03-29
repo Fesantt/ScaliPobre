@@ -714,17 +714,30 @@
     ctx.fillStyle = '#ff6b35';
     ctx.fillText('Hand-Drawn!', 250, 450);
 
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
     // Dark Mode Toggle
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
       localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-      const icon = document.querySelector('.theme-toggle');
-      icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+      const themeBtn = document.querySelector('.theme-toggle');
+      const icon = themeBtn.querySelector('i');
+      
+      if (document.body.classList.contains('dark')) {
+        icon.setAttribute('data-lucide', 'sun');
+      } else {
+        icon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
     }
 
     if (localStorage.getItem('darkMode') === 'true') {
       document.body.classList.add('dark');
-      document.querySelector('.theme-toggle').textContent = '☀️';
+      const themeBtn = document.querySelector('.theme-toggle');
+      const icon = themeBtn.querySelector('i');
+      icon.setAttribute('data-lucide', 'sun');
+      lucide.createIcons();
     }
 
     // Check if already logged in
