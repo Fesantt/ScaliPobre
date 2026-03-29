@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ScaliPobre Colaborativo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #2c1810 0%, #1a1a1a 100%);
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.1;
+    }
+
+    .container {
+      background: white;
+      border: 5px solid #333;
+      border-radius: 24px;
+      box-shadow: 8px 8px 0px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.15);
+      padding: 48px;
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      z-index: 1;
+      animation: slideUp 0.5s ease-out;
+      transition: all 0.3s;
+      transform: rotate(-1deg);
+    }
+
+    body.dark .container {
+      background: #2a2a2a;
+      border-color: #555;
+      box-shadow: 8px 8px 0px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    body.dark .theme-toggle {
+      background: #2a2a2a;
+      border-color: #555;
+    }
+
+    .theme-toggle:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+    }
+
+    .theme-toggle:active {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      border: 4px solid #333;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+      transform: rotate(-3deg);
+    }
+
+    .logo-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: white;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .logo h1 {
+      font-size: 36px;
+      font-weight: 900;
+      color: #ff6b35;
+      margin-bottom: 8px;
+      text-shadow: 3px 3px 0px rgba(247, 147, 30, 0.3);
+      letter-spacing: -1px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    body.dark .logo p {
+      color: #aaa;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 20px;
+      background: #f0f0f0;
+      border: 3px solid #333;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.dark .tab {
+      background: #333;
+      color: #aaa;
+      border-color: #555;
+    }
+
+    .tab:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+    }
+
+    body.dark .tab.active {
+      background: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
+      border-color: #555;
+    }
+
+    .form-content {
+      display: none;
+    }
+
+    .form-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    body.dark .form-group label {
+      color: #e0e0e0;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 3px solid #333;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+      font-family: inherit;
+    }
+
+    body.dark .form-group input {
+      background: #333;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #ff6b35;
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px rgba(255, 107, 53, 0.3);
+    }
+
+    body.dark .form-group input:focus {
+      border-color: #ff8c42;
+      box-shadow: 4px 4px 0px rgba(255, 140, 66, 0.3);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: 4px solid #333;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: inherit;
+    }
+
+    .submit-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0px rgba(0,0,0,0.3);
+    }
+
+    .submit-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 14px 18px;
+      border: 3px solid #c62828;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      display: none;
+      box-shadow: 3px 3px 0px rgba(198, 40, 40, 0.2);
+    }
+
+    .error.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="container">
+    <button class="theme-toggle" onclick="toggleDarkMode()" title="Alternar tema">🌙</button>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+          <path d="M2 2l7.586 7.586"/>
+        </svg>
+      </div>
+      <h1>ScaliPobre</h1>
+      <p>Colaboração em tempo real</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="login">Login</button>
+      <button class="tab" data-tab="register">Registro</button>
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <div id="login-form" class="form-content active">
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Username ou Email</label>
+          <input type="text" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" name="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="submit-btn">Entrar</button>
+      </form>
+    </div>
+
+    <div id="register-form" class="form-content">
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" name="password" required autocomplete="new-password" minlength="6">
+        </div>
+        <div class="form-group">
+          <label>Confirmar Senha</label>
+          <input type="password" name="confirm_password" required autocomplete="new-password" minlength="6">
+        </div>
+        <button type="submit" class="submit-btn">Criar Conta</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.form-content').forEach(f => f.classList.remove('active'));
+        
+        tab.classList.add('active');
+        const tabName = tab.dataset.tab;
+        document.getElementById(`${tabName}-form`).classList.add('active');
+        hideError();
+      });
+    });
+
+    function showError(message) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('error').classList.remove('show');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+
+      const formData = new FormData(e.target);
+      const data = {
+        username: formData.get('username'),
+        password: formData.get('password')
+      };
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          window.location.href = '/boards';
+        } else {
+          showError(result.error || 'Erro ao fazer login');
+        }
+      } catch (err) {
+        showError('Erro de conexão com o servidor');
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      hideError();
+
+      const formData = new FormData(e.target);
+      const password = formData.get('password');
+      const confirmPassword = formData.get('confirm_password');
+
+      if (password !== confirmPassword) {
+        showError('As senhas não coincidem');
+        return;
+      }
+
+      const data = {
+        username: formData.get('username'),
+        email: formData.get('email'),
+        password: password
+      };
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          window.location.href = '/boards';
+        } else {
+          showError(result.error || 'Erro ao criar conta');
+        }
+      } catch (err) {
+        showError('Erro de conexão com o servidor');
+      }
+    }
+
+    (async () => {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          window.location.href = '/boards';
+        }
+      } catch (err) {}
+    })();
+
+    // Background Canvas Animation
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    });
+    
+    const shapes = [];
+    const colors = ['#ff6b35', '#f7931e', '#ff8c42', '#ffa459', '#ffb770'];
+    
+    class Shape {
+      constructor() {
+        this.reset();
+      }
+      
+      reset() {
+        this.x = Math.random() * bgCanvas.width;
+        this.y = Math.random() * bgCanvas.height;
+        this.size = 20 + Math.random() * 60;
+        this.type = Math.floor(Math.random() * 4);
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.alpha = 0;
+        this.fadeIn = true;
+        this.life = 0;
+        this.maxLife = 200 + Math.random() * 300;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+      }
+      
+      update() {
+        this.life++;
+        this.rotation += this.rotationSpeed;
+        
+        if (this.fadeIn) {
+          this.alpha += 0.02;
+          if (this.alpha >= 1) {
+            this.alpha = 1;
+            this.fadeIn = false;
+          }
+        } else if (this.life > this.maxLife * 0.8) {
+          this.alpha -= 0.02;
+        }
+        
+        if (this.life > this.maxLife) {
+          this.reset();
+        }
+      }
+      
+      draw() {
+        bgCtx.save();
+        bgCtx.globalAlpha = this.alpha;
+        bgCtx.strokeStyle = this.color;
+        bgCtx.lineWidth = 2;
+        bgCtx.lineCap = 'round';
+        bgCtx.translate(this.x, this.y);
+        bgCtx.rotate(this.rotation);
+        
+        bgCtx.beginPath();
+        switch (this.type) {
+          case 0: // Circle
+            bgCtx.arc(0, 0, this.size, 0, Math.PI * 2);
+            break;
+          case 1: // Rectangle
+            bgCtx.rect(-this.size/2, -this.size/2, this.size, this.size);
+            break;
+          case 2: // Line
+            bgCtx.moveTo(-this.size, -this.size);
+            bgCtx.lineTo(this.size, this.size);
+            break;
+          case 3: // Triangle
+            bgCtx.moveTo(0, -this.size);
+            bgCtx.lineTo(this.size, this.size);
+            bgCtx.lineTo(-this.size, this.size);
+            bgCtx.closePath();
+            break;
+        }
+        bgCtx.stroke();
+        bgCtx.restore();
+      }
+    }
+    
+    for (let i = 0; i < 15; i++) {
+      shapes.push(new Shape());
+    }
+    
+    function animateBackground() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      
+      shapes.forEach(shape => {
+        shape.update();
+        shape.draw();
+      });
+      
+      requestAnimationFrame(animateBackground);
+    }
+    
+    animateBackground();
+
+    // ==================== TEMA ESCURO ====================
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+      const icon = document.querySelector('.theme-toggle');
+      icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+      document.querySelector('.theme-toggle').textContent = '☀️';
+    }
+  </script>
+</body>
+</html>

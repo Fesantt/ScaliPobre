@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Boards - ScaliPobre</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      padding-bottom: 100px;
+      position: relative;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #2c1810 0%, #1a1a1a 100%);
+      color: #e0e0e0;
+    }
+
+    .header {
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+      border-bottom: 3px solid #ff6b35;
+      position: relative;
+    }
+
+    body.dark .header {
+      background: #2a2a2a;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border-bottom: 3px solid #ff8c42;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #ff6b35;
+      transition: color 0.3s;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-shadow: 2px 2px 0px rgba(247, 147, 30, 0.3);
+    }
+
+    body.dark .header h1 {
+      color: #ff8c42;
+      text-shadow: 2px 2px 0px rgba(255, 140, 66, 0.3);
+    }
+
+    .user-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .user-info span {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      color: #333;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border: 3px solid #333;
+      border-radius: 12px;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+
+    body.dark .user-info span {
+      background: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
+      color: #fff;
+      border-color: #555;
+    }
+
+    .theme-toggle {
+      padding: 10px 14px;
+      background: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 22px;
+      transition: all 0.2s;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    body.dark .theme-toggle {
+      background: #2a2a2a;
+      border-color: #555;
+    }
+
+    .theme-toggle:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+    }
+
+    .theme-toggle:active {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    .logout-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all 0.2s;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.dark .logout-btn {
+      background: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
+      border-color: #555;
+    }
+
+    .logout-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+    }
+
+    .logout-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    #admin-btn {
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      color: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      font-size: 20px;
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    body.dark #admin-btn {
+      background: linear-gradient(135deg, #66bb6a 0%, #81c784 100%);
+      border-color: #555;
+    }
+
+    #admin-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+    }
+
+    #admin-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .actions h2 {
+      font-size: 28px;
+      color: #333;
+      transition: color 0.3s;
+    }
+
+    body.dark .actions h2 {
+      color: #e0e0e0;
+    }
+
+    .create-btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .create-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px rgba(0,0,0,0.3);
+    }
+
+    .create-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    .boards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .board-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 4px 4px 0px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      position: relative;
+      border: 3px solid #333;
+      cursor: pointer;
+      transform: rotate(-0.5deg);
+    }
+
+    .board-card:nth-child(even) {
+      transform: rotate(0.5deg);
+    }
+
+    body.dark .board-card {
+      background: #2a2a2a;
+      box-shadow: 4px 4px 0px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.4);
+      border-color: #555;
+    }
+
+    .board-card:hover {
+      box-shadow: 8px 8px 0px rgba(255, 107, 53, 0.3), 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(-8px) rotate(0deg) scale(1.02);
+    }
+
+    body.dark .board-card:hover {
+      box-shadow: 8px 8px 0px rgba(255, 140, 66, 0.3), 0 8px 24px rgba(0,0,0,0.6);
+    }
+
+    .board-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+
+    .board-card h3 {
+      font-size: 22px;
+      color: #333;
+      cursor: pointer;
+      flex: 1;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+
+    body.dark .board-card h3 {
+      color: #e0e0e0;
+    }
+
+    .board-actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .board-card:hover .board-actions {
+      opacity: 1;
+    }
+
+    .board-action-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      transition: transform 0.2s;
+    }
+
+    .board-action-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .board-card .meta {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    body.dark .board-card .meta {
+      color: #777;
+    }
+
+    .board-card .role {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e3f2fd;
+      color: #2196f3;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .board-card .role.owner {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transition: background 0.3s;
+    }
+
+    body.dark .modal-content {
+      background: #2a2a2a;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 24px;
+      font-size: 24px;
+      color: #333;
+      transition: color 0.3s;
+    }
+
+    body.dark .modal-content h2 {
+      color: #e0e0e0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    body.dark .form-group label {
+      color: #e0e0e0;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    body.dark .form-group input {
+      background: #333;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #ff6b35;
+    }
+
+    body.dark .form-group input:focus {
+      border-color: #ff8c42;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark .btn-secondary {
+      background: #444;
+      color: #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    body.dark .btn-secondary:hover {
+      background: #555;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #999;
+      transition: color 0.3s;
+    }
+
+    body.dark .empty-state {
+      color: #666;
+    }
+
+    .empty-state svg {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    /* ==================== FOOTER CHAMATIVO ==================== */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      border-top: 4px solid #333;
+      z-index: 100;
+    }
+
+    body.dark .footer {
+      background: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
+      border-top-color: #555;
+    }
+
+    .footer-btn {
+      padding: 16px 48px;
+      background: white;
+      color: #ff6b35;
+      border: 4px solid #333;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 6px 6px 0px rgba(0,0,0,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    body.dark .footer-btn {
+      background: #2a2a2a;
+      color: #ff8c42;
+      border-color: #555;
+    }
+
+    .footer-btn:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 9px 9px 0px rgba(0,0,0,0.4);
+      background: #fffaf0;
+    }
+
+    body.dark .footer-btn:hover {
+      background: #333;
+    }
+
+    .footer-btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+    }
+
+    .footer-text {
+      margin-right: 16px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .footer-btn {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .footer-btn:hover {
+      animation: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎨 ScaliPobre</h1>
+    <div class="user-info">
+      <span id="username">Carregando...</span>
+      <button id="admin-btn" class="theme-toggle" onclick="window.location.href='/admin'" title="Painel Admin" style="display: none;">⚙️</button>
+      <button class="theme-toggle" onclick="toggleDarkMode()" title="Alternar tema">🌙</button>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="actions">
+      <h2>Meus Boards</h2>
+      <button class="create-btn" onclick="showCreateModal()">+ Novo Board</button>
+    </div>
+
+    <div id="boards-grid" class="boards-grid"></div>
+  </div>
+
+  <div id="create-modal" class="modal">
+    <div class="modal-content">
+      <h2>Criar Novo Board</h2>
+      <form onsubmit="createBoard(event)">
+        <div class="form-group">
+          <label>Nome do Board</label>
+          <input type="text" id="board-name" required placeholder="Ex: Projeto X, Brainstorm...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideCreateModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Criar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="rename-modal" class="modal">
+    <div class="modal-content">
+      <h2>Renomear Board</h2>
+      <form onsubmit="renameBoard(event)">
+        <div class="form-group">
+          <label>Novo Nome</label>
+          <input type="text" id="rename-board-name" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideRenameModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Renomear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="delete-modal" class="modal">
+    <div class="modal-content">
+      <h2>Excluir Board</h2>
+      <p style="margin-bottom: 24px; color: #666;">Tem certeza que deseja excluir "<span id="delete-board-name"></span>"? Esta ação não pode ser desfeita.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="hideDeleteModal()">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDeleteBoard()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Chamativo -->
+  <div class="footer">
+    <span class="footer-text">✨ Compartilhe a criatividade!</span>
+    <button class="footer-btn" onclick="window.location.href='/invite'">
+      <span>🎁</span>
+      <span>Convidar Amigos</span>
+    </button>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        const data = await res.json();
+        currentUser = data.user;
+        document.getElementById('username').textContent = currentUser.username;
+        
+        if (currentUser.isSuperAdmin) {
+          document.getElementById('admin-btn').style.display = 'block';
+        }
+      } catch (err) {
+        window.location.href = '/login';
+      }
+    }
+
+    async function loadBoards() {
+      try {
+        const res = await fetch('/api/boards');
+        const data = await res.json();
+        
+        const grid = document.getElementById('boards-grid');
+        
+        if (data.boards.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <h3>Nenhum board ainda</h3>
+              <p>Crie seu primeiro board para começar!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        grid.innerHTML = data.boards.map(board => `
+          <div class="board-card">
+            <div class="board-card-header">
+              <h3 onclick="openBoard('${board.id}')">${escapeHtml(board.name)}</h3>
+              ${board.role === 'owner' ? `
+                <div class="board-actions">
+                  <button class="board-action-btn" onclick="showRenameModal('${board.id}', '${escapeHtml(board.name).replace(/'/g, "\\'")}'); event.stopPropagation();" title="Renomear">✏️</button>
+                  <button class="board-action-btn" onclick="showDeleteModal('${board.id}', '${escapeHtml(board.name).replace(/'/g, "\\'")}'); event.stopPropagation();" title="Excluir">🗑️</button>
+                </div>
+              ` : ''}
+            </div>
+            <div class="meta" onclick="openBoard('${board.id}')">${new Date(board.created_at).toLocaleDateString('pt-BR')}</div>
+            <span class="role ${board.role}" onclick="openBoard('${board.id}')">${board.role === 'owner' ? 'Dono' : 'Editor'}</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar boards:', err);
+      }
+    }
+
+    // ==================== TEMA ESCURO ====================
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+      const icon = document.querySelector('.theme-toggle');
+      icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+      document.querySelector('.theme-toggle').textContent = '☀️';
+    }
+
+    // ==================== GERENCIAMENTO DE BOARDS ====================
+    let selectedBoardId = null;
+
+    function showRenameModal(boardId, boardName) {
+      selectedBoardId = boardId;
+      document.getElementById('rename-board-name').value = boardName;
+      document.getElementById('rename-modal').classList.add('show');
+      document.getElementById('rename-board-name').focus();
+    }
+
+    function hideRenameModal() {
+      document.getElementById('rename-modal').classList.remove('show');
+      selectedBoardId = null;
+    }
+
+    async function renameBoard(e) {
+      e.preventDefault();
+      const newName = document.getElementById('rename-board-name').value;
+      
+      try {
+        const res = await fetch(`/api/boards/${selectedBoardId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        });
+        
+        if (res.ok) {
+          hideRenameModal();
+          loadBoards();
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Erro ao renomear board');
+        }
+      } catch (err) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function showDeleteModal(boardId, boardName) {
+      selectedBoardId = boardId;
+      document.getElementById('delete-board-name').textContent = boardName;
+      document.getElementById('delete-modal').classList.add('show');
+    }
+
+    function hideDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('show');
+      selectedBoardId = null;
+    }
+
+    async function confirmDeleteBoard() {
+      try {
+        const res = await fetch(`/api/boards/${selectedBoardId}`, {
+          method: 'DELETE'
+        });
+        
+        if (res.ok) {
+          hideDeleteModal();
+          loadBoards();
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Erro ao excluir board');
+        }
+      } catch (err) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function showCreateModal() {
+      document.getElementById('create-modal').classList.add('show');
+      document.getElementById('board-name').value = '';
+      document.getElementById('board-name').focus();
+    }
+
+    function hideCreateModal() {
+      document.getElementById('create-modal').classList.remove('show');
+    }
+
+    async function createBoard(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('board-name').value;
+      
+      try {
+        const res = await fetch('/api/boards', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          hideCreateModal();
+          window.location.href = `/board/${data.board.id}`;
+        } else {
+          alert(data.error || 'Erro ao criar board');
+        }
+      } catch (err) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function openBoard(boardId) {
+      window.location.href = `/board/${boardId}`;
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = '/login';
+      } catch (err) {
+        window.location.href = '/login';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.getElementById('create-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'create-modal') {
+        hideCreateModal();
+      }
+    });
+
+    loadUser();
+    loadBoards();
+  </script>
+</body>
+</html>

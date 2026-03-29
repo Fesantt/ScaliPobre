@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aceitar Convite - Whiteboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .board-info {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .board-info h2 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .board-info .meta {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .accept-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .accept-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .accept-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .login-link {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .login-link:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .loading {
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading" class="loading">
+      <div class="icon">⏳</div>
+      <h1>Carregando convite...</h1>
+    </div>
+
+    <div id="content" style="display: none;">
+      <div class="icon">📨</div>
+      <h1>Você foi convidado!</h1>
+      <p>Você recebeu um convite para colaborar em um board compartilhado.</p>
+
+      <div id="board-info" class="board-info"></div>
+
+      <div id="error" class="error" style="display: none;"></div>
+
+      <button id="accept-btn" class="accept-btn" onclick="acceptInvite()">Aceitar Convite</button>
+      <div>
+        <a href="/login" class="login-link">Já tem conta? Faça login</a>
+      </div>
+    </div>
+
+    <div id="error-state" style="display: none;">
+      <div class="icon">❌</div>
+      <h1>Convite inválido</h1>
+      <p>Este convite pode ter expirado ou já foi usado.</p>
+      <a href="/login" class="login-link">Ir para login</a>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (!token) {
+      // Sem token = mostrar lista de boards para gerar convites
+      showBoardsList();
+    }
+
+    async function showBoardsList() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const boardsRes = await fetch('/api/boards');
+        const boardsData = await boardsRes.json();
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').innerHTML = `
+          <div class="icon">🎁</div>
+          <h1>Convidar Amigos</h1>
+          <p>Compartilhe seus boards com outras pessoas! Selecione um board para gerar um link de convite.</p>
+          
+          <div id="boards-list" style="margin: 30px 0;">
+            ${boardsData.boards.length === 0 ? 
+              '<p style="color: #999;">Você ainda não tem boards. <a href="/boards">Criar board</a></p>' :
+              boardsData.boards.filter(b => b.role === 'owner').map(board => `
+                <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 12px; text-align: left; cursor: pointer;" onclick="generateInvite('${board.id}', '${board.name.replace(/'/g, "\\'")}')">
+                  <h3 style="margin: 0 0 4px 0; font-size: 16px;">${escapeHtml(board.name)}</h3>
+                  <p style="margin: 0; font-size: 13px; color: #999;">Clique para gerar link de convite</p>
+                </div>
+              `).join('') || '<p style="color: #999;">Você não é dono de nenhum board.</p>'
+            }
+          </div>
+
+          <div id="invite-result" style="display: none; background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 20px;">
+            <p style="margin: 0 0 8px 0; font-weight: 600; color: #2e7d32;">Link de convite gerado!</p>
+            <input type="text" id="invite-link" readonly style="width: 100%; padding: 10px; border: 2px solid #4caf50; border-radius: 6px; font-size: 14px; margin-bottom: 8px;">
+            <button onclick="copyInviteLink()" style="width: 100%; padding: 10px; background: #4caf50; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copiar Link</button>
+          </div>
+
+          <a href="/boards" style="display: inline-block; margin-top: 20px; color: #667eea; text-decoration: none; font-size: 14px;">← Voltar para Boards</a>
+        `;
+        document.getElementById('content').style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        showErrorState();
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function generateInvite(boardId, boardName) {
+      try {
+        const res = await fetch(`/api/boards/${boardId}/invite`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) {
+          document.getElementById('invite-link').value = data.inviteLink;
+          document.getElementById('invite-result').style.display = 'block';
+        } else {
+          alert(data.error || 'Erro ao gerar convite');
+        }
+      } catch (err) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function copyInviteLink() {
+      const input = document.getElementById('invite-link');
+      input.select();
+      document.execCommand('copy');
+      
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.textContent = '✓ Copiado!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+      }, 2000);
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+        } else {
+          document.getElementById('loading').innerHTML = `
+            <div class="icon">🔐</div>
+            <h1>Login necessário</h1>
+            <p>Você precisa fazer login ou criar uma conta para aceitar este convite.</p>
+            <a href="/login" class="accept-btn" style="display: inline-block; text-decoration: none; margin-top: 20px;">Fazer Login / Registrar</a>
+          `;
+        }
+      } catch (err) {
+        showErrorState();
+      }
+    }
+
+    async function acceptInvite() {
+      const btn = document.getElementById('accept-btn');
+      btn.disabled = true;
+      btn.textContent = 'Aceitando...';
+
+      try {
+        const res = await fetch('/api/invites/accept', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          window.location.href = `/board/${data.board.id}`;
+        } else {
+          showError(data.error || 'Erro ao aceitar convite');
+          btn.disabled = false;
+          btn.textContent = 'Aceitar Convite';
+        }
+      } catch (err) {
+        showError('Erro de conexão');
+        btn.disabled = false;
+        btn.textContent = 'Aceitar Convite';
+      }
+    }
+
+    function showError(message) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+    }
+
+    function showErrorState() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
